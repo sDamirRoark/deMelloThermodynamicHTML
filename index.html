@@ -63,9 +63,7 @@
 <div id="output" class="result"></div>
 
 <footer>
-  Made with <span class="heart">❤️</span> by 
-  <a href="https://www.linkedin.com/in/suyashsachindamir/" target="_blank">Suyash</a> 
-  in <a href="https://www.demellogroup.ethz.ch/" target="_blank">deMello group</a>
+  Made with <span class="heart">❤️</span> by <a href="https://www.demellogroup.ethz.ch/" target="_blank">deMello group</strong></a>
 </footer>
 
 <!-- Embedded JSON data -->
@@ -88,7 +86,7 @@ function setupInputs() {
   } else if (mode.includes('Pressure') && !mode.includes('Superheated')) {
     html = `Pressure (kPa): <input type="number" id="pressInput">`;
   } else {
-    html = `Pressure (MPa): <select id="pressSelect">${[...new Set(superheat.map(d => d.P))].map(p => `<option>${p}</option>`).join('')}</select><br>
+    html = `Pressure (kPa): <select id="pressSelect">${[...new Set(superheat.map(d => d.P))].map(p => `<option>${p}</option>`).join('')}</select><br>
             Temperature (°C): <input type="number" id="tempInput">`;
   }
   document.getElementById('inputs').innerHTML = html;
@@ -138,4 +136,5 @@ setupInputs();
 
 </body>
 </html>
+
 
