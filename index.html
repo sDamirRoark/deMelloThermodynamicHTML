@@ -114,17 +114,37 @@ function getProperties() {
   const mode = document.getElementById('mode').value;
   let result = {};
 
+  // Define units for each property
+  const units = {
+    P: 'kPa',
+    T: '°C',
+    v_f: 'm³/kg',
+    v_fg: 'm³/kg',
+    v_g: 'm³/kg',
+    v: 'm³/kg',
+    u_f: 'kJ/kg',
+    u_fg: 'kJ/kg',
+    u_g: 'kJ/kg',
+    u: 'kJ/kg',
+    h_f: 'kJ/kg',
+    h_fg: 'kJ/kg',
+    h_g: 'kJ/kg',
+    h: 'kJ/kg',
+    s_f: 'kJ/kg·K',
+    s_fg: 'kJ/kg·K',
+    s_g: 'kJ/kg·K',
+    s: 'kJ/kg·K'
+  };
+
   if (mode === 'sat_temp') {
     const T = parseFloat(document.getElementById('tempInput').value);
     if (!isNaN(T)) {
       result = interpolate(satTemp, 'T', T, ["P", "v_f", "v_fg", "v_g", "u_f", "u_fg", "u_g", "h_f", "h_fg", "h_g", "s_f", "s_fg", "s_g"]);
-      if (result.P !== undefined) result.P += " kPa";
     }
   } else if (mode === 'sat_press') {
     const P = parseFloat(document.getElementById('pressInput').value);
     if (!isNaN(P)) {
       result = interpolate(satPress, 'P', P, ["T", "v_f", "v_fg", "v_g", "u_f", "u_fg", "u_g", "h_f", "h_fg", "h_g", "s_f", "s_fg", "s_g"]);
-      if (result.T !== undefined) result.T += " °C";
     }
   } else if (mode === 'superheated') {
     const P = parseFloat(document.getElementById('pressSelect').value);
@@ -138,8 +158,12 @@ function getProperties() {
   let outputHTML = '<h3>Results:</h3>';
   if (Object.keys(result).length > 0) {
     outputHTML += '<ul>';
-    for (let [k, v] of Object.entries(result)) {
-      outputHTML += `<li>${k} = ${v}</li>`;
+    for (let [key, value] of Object.entries(result)) {
+      // Round values for display: 4 decimals for specific volumes, 2 for others
+      const formattedValue = key.startsWith('v') ? value.toFixed(4) : value.toFixed(2);
+      // Append unit from units object, or empty string if no unit defined
+      const unit = units[key] || '';
+      outputHTML += `<li>${key} = ${formattedValue} ${unit}</li>`;
     }
     outputHTML += '</ul>';
   } else {
@@ -153,6 +177,7 @@ setupInputs();
 
 </body>
 </html>
+
 
 
 
