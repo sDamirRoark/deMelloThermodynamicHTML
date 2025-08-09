@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Steam Table Calculator</title>
+<title>Thermodynamic Tool</title>
 <style>
   body {
     font-family: Arial, sans-serif;
@@ -46,14 +46,11 @@
 <body>
 
 <img src="deMlogo.png" class="logo" alt="Logo">
-<h1>Steam Table Calculator</h1>
+<h1>Thermodynamic Tool</h1>
 
-<label for="mode" style="display:block; font-weight:bold; margin-top:20px;">
-  Choose the condition:
-</label>
 <select id="mode">
-  <option>Saturated Water</option>
-  <option>Saturated Water Pressure Entry</option>
+  <option>Saturated Water (by Temperature)</option>
+  <option>Saturated Water (by Pressure)</option>
   <option>Superheated Vapor</option>
 </select>
 
@@ -63,7 +60,9 @@
 <div id="output" class="result"></div>
 
 <footer>
-  Made with <span class="heart">❤️</span> by <a href="https://www.demellogroup.ethz.ch/" target="_blank">deMello group</strong></a>
+  Made with <span class="heart">❤️</span> by 
+  <a href="https://www.linkedin.com/in/suyashsachindamir/" target="_blank">Suyash</a> 
+  in <a href="https://www.demellogroup.ethz.ch/" target="_blank">deMello group</a>
 </footer>
 
 <!-- Embedded JSON data -->
@@ -86,7 +85,7 @@ function setupInputs() {
   } else if (mode.includes('Pressure') && !mode.includes('Superheated')) {
     html = `Pressure (kPa): <input type="number" id="pressInput">`;
   } else {
-    html = `Pressure (kPa): <select id="pressSelect">${[...new Set(superheat.map(d => d.P))].map(p => `<option>${p}</option>`).join('')}</select><br>
+    html = `Pressure (MPa): <select id="pressSelect">${[...new Set(superheat.map(d => d.P))].map(p => `<option>${p}</option>`).join('')}</select><br>
             Temperature (°C): <input type="number" id="tempInput">`;
   }
   document.getElementById('inputs').innerHTML = html;
@@ -136,5 +135,3 @@ setupInputs();
 
 </body>
 </html>
-
-
