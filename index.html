@@ -111,20 +111,25 @@ function interpolate(arr, key, value, outputs) {
 function getProperties() {
   const mode = document.getElementById('mode').value;
   let result = {};
-  if (mode.includes('Temperature') && !mode.includes('Superheated')) {
+
+  if (mode === 'sat_temp') {
     const T = parseFloat(document.getElementById('tempInput').value);
     result = interpolate(satTemp, 'T', T, ["P", "v_f", "v_fg", "v_g", "u_f", "u_fg", "u_g", "h_f", "h_fg", "h_g", "s_f", "s_fg", "s_g"]);
     if (result.P !== undefined) result.P += " kPa";
-  } else if (mode.includes('Pressure') && !mode.includes('Superheated')) {
+
+  } else if (mode === 'sat_press') {
     const P = parseFloat(document.getElementById('pressInput').value);
     result = interpolate(satPress, 'P', P, ["T", "v_f", "v_fg", "v_g", "u_f", "u_fg", "u_g", "h_f", "h_fg", "h_g", "s_f", "s_fg", "s_g"]);
     if (result.T !== undefined) result.T += " °C";
-  } else {
+
+  } else if (mode === 'superheated') {
     const P = parseFloat(document.getElementById('pressSelect').value);
     const T = parseFloat(document.getElementById('tempInput').value);
     const subset = superheat.filter(r => r.P === P);
     result = interpolate(subset, 'T', T, ["v", "u", "h", "s"]);
   }
+}
+
   
   let outputHTML = '<h3>Results:</h3><ul>';
   for (let [k, v] of Object.entries(result)) {
@@ -139,6 +144,7 @@ setupInputs();
 
 </body>
 </html>
+
 
 
 
