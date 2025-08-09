@@ -53,10 +53,11 @@
 </label>
   
 <select id="mode">
-  <option>Saturated Water</option>
-  <option>Saturated Water</option>
-  <option>Superheated Vapor</option>
+  <option value="sat_temp">Saturated Water</option>
+  <option value="sat_press">Saturated Water Pressure Entry</option>
+  <option value="superheated">Superheated Vapor</option>
 </select>
+
 
 <div id="inputs"></div>
 <button onclick="getProperties()">Get Properties</button>
@@ -138,5 +139,6 @@ setupInputs();
 
 </body>
 </html>
+
 
 
