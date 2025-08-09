@@ -37,6 +37,11 @@
     background: black; /* Black background for output */
     padding: 15px; /* Add padding for better appearance */
     border-radius: 5px; /* Rounded corners */
+    visibility: hidden; /* Hide by default */
+  }
+  
+  .result.visible {
+    visibility: visible; /* Show when results are available */
   }
   .result h3 {
     color: white; /* White color for "Results" header */
@@ -168,28 +173,31 @@ function getProperties() {
     }
   }
 
+  const outputDiv = document.getElementById('output');
   let outputHTML = '<h3>Results:</h3>';
   if (Object.keys(result).length > 0) {
     outputHTML += '<ul>';
     for (let [key, value] of Object.entries(result)) {
-      // Format all values to 4 decimal places
       const formattedValue = value.toFixed(4);
-      // Append unit with a span for styling
       const unit = units[key] || '';
       outputHTML += `<li>${key} = ${formattedValue} <span class="unit">${unit}</span></li>`;
     }
     outputHTML += '</ul>';
+    outputDiv.classList.add('visible'); // Show output div
   } else {
     outputHTML += '<p>No valid data found. Please check your input.</p>';
+    outputDiv.classList.add('visible'); // Show output div for error message
   }
-  document.getElementById('output').innerHTML = outputHTML;
+  outputDiv.innerHTML = outputHTML;
 }
+
 
 setupInputs();
 </script>
 
 </body>
 </html>
+
 
 
 
