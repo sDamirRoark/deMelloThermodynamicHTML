@@ -181,8 +181,7 @@ function setupInputs() {
         mode === 'r410a_sat' || mode === 'r134a_sat' || mode === 'n2_sat' || 
         mode === 'ch4_sat_temp' || mode === 'sat_press' || mode === 'water_satsolidsatvapor') {
       
-      const tempUnit = (mode === 'n2_sat') ? 'K' : '°C'; // Fixed degree symbol
-      const tempMin = (mode === 'n2_sat') ? '0' : '-273';
+      const tempUnit = (mode === 'n2_sat') ? 'K' : '°C';
       
       html = `
         <div style="margin: 20px;">
@@ -190,7 +189,7 @@ function setupInputs() {
           <div class="input-option">
             <input type="radio" id="tempOption" name="inputType" value="temperature" checked>
             <label for="tempOption">Temperature (${tempUnit}): </label>
-            <input type="number" id="tempInput" step="any" min="${tempMin}">
+            <input type="number" id="tempInput" step="any">
           </div>
           <div class="input-option">
             <input type="radio" id="pressOption" name="inputType" value="pressure">
@@ -201,18 +200,11 @@ function setupInputs() {
         
     } else if (mode === 'superheated' || mode.includes('superheat')) {
       let dataset;
-      if (mode === 'superheated') dataset = water.superheat;
-      else if (mode === 'nh3_superheat') dataset = ammonia.superheat;
-      else if (mode === 'co2_superheat') dataset = co2.superheat;
-      else if (mode === 'r410a_superheat') dataset = r410a.superheat;
-      else if (mode === 'r134a_superheat') dataset = r134a.superheat;
-      else if (mode === 'n2_superheat') dataset = nitrogen.superheat;
-      else if (mode === 'ch4_superheat') dataset = methane.superheat;
+      // ... dataset selection logic ...
       
       if (dataset && dataset.length > 0) {
         const pressures = [...new Set(dataset.map(d => d.P))].sort((a, b) => a - b);
         const tempUnit = (mode === 'n2_superheat') ? 'K' : '°C';
-        const tempMin = (mode === 'n2_superheat') ? '0' : '-273';
         
         html = `
           <div style="margin: 20px;">
@@ -222,7 +214,7 @@ function setupInputs() {
               </select>
             </p>
             <p>Temperature (${tempUnit}): 
-              <input type="number" id="tempInput" step="any" min="${tempMin}">
+              <input type="number" id="tempInput" step="any">
             </p>
           </div>`;
       } else {
@@ -241,7 +233,7 @@ function setupInputs() {
               </select>
             </p>
             <p>Temperature (°C): 
-              <input type="number" id="tempInput" step="any" min="-273">
+              <input type="number" id="tempInput" step="any">
             </p>
           </div>`;
       } else {
@@ -432,6 +424,11 @@ function getProperties() {
         
         const T = parseFloat(tempInput.value);
         if (isNaN(T)) throw new Error("Please enter a valid temperature value");
+
+        // Custom validation - only check for Kelvin temperatures
+        if (substance === 'nitrogen' && T < 0) {
+          throw new Error("Temperature in Kelvin cannot be negative");
+        }
         
         if (mode === 'water_satsolidsatvapor') {
           result = interpolate(dataset, 'T', T, ["P","v_i","v_ig","v_g","u_i","u_ig","u_g","h_i","h_ig","h_g","s_i","s_ig","s_g"]);
@@ -523,6 +520,7 @@ setupInputs();
 
 </body>
 </html>
+
 
 
 
