@@ -200,7 +200,13 @@ function setupInputs() {
         
     } else if (mode === 'superheated' || mode.includes('superheat')) {
       let dataset;
-      // ... dataset selection logic ...
+      if (mode === 'superheated') dataset = water.superheat;
+      else if (mode === 'nh3_superheat') dataset = ammonia.superheat;
+      else if (mode === 'co2_superheat') dataset = co2.superheat;
+      else if (mode === 'r410a_superheat') dataset = r410a.superheat;
+      else if (mode === 'r134a_superheat') dataset = r134a.superheat;
+      else if (mode === 'n2_superheat') dataset = nitrogen.superheat;
+      else if (mode === 'ch4_superheat') dataset = methane.superheat;
       
       if (dataset && dataset.length > 0) {
         const pressures = [...new Set(dataset.map(d => d.P))].sort((a, b) => a - b);
@@ -424,7 +430,7 @@ function getProperties() {
         
         const T = parseFloat(tempInput.value);
         if (isNaN(T)) throw new Error("Please enter a valid temperature value");
-
+        
         // Custom validation - only check for Kelvin temperatures
         if (substance === 'nitrogen' && T < 0) {
           throw new Error("Temperature in Kelvin cannot be negative");
@@ -440,7 +446,7 @@ function getProperties() {
         if (!pressInput) throw new Error("Pressure input not found");
         
         const P = parseFloat(pressInput.value);
-        if (isNaN(P)) throw new Error("Please enter a valid pressure value");
+        if (isNaN(P) || P < 0) throw new Error("Please enter a valid positive pressure value");
         
         if (mode === 'water_satsolidsatvapor') {
           result = interpolate(dataset, 'P', P, ["T","v_i","v_ig","v_g","u_i","u_ig","u_g","h_i","h_ig","h_g","s_i","s_ig","s_g"]);
@@ -461,6 +467,11 @@ function getProperties() {
       const P = parseFloat(pressSelect.value);
       const T = parseFloat(tempInput.value);
       if (isNaN(P) || isNaN(T)) throw new Error("Please enter valid pressure and temperature values");
+      
+      // Custom validation for temperature
+      if (substance === 'nitrogen' && T < 0) {
+        throw new Error("Temperature in Kelvin cannot be negative");
+      }
       
       const subset = dataset.filter(r => Math.abs(parseFloat(r.P) - P) < 1e-6);
       if (subset.length === 0) throw new Error(`No data available for pressure ${P} kPa`);
