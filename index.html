@@ -176,29 +176,29 @@ function setupInputs() {
   const mode = document.getElementById('mode').value;
   let html = '';
   
-  // For saturated data - give option to input either temperature OR pressure
   if (mode === 'sat_temp' || mode === 'nh3_sat' || mode === 'co2_sat' || 
       mode === 'r410a_sat' || mode === 'r134a_sat' || mode === 'n2_sat' || 
       mode === 'ch4_sat_temp' || mode === 'sat_press' || mode === 'water_satsolidsatvapor') {
     
     const tempUnit = (mode === 'n2_sat') ? 'K' : '°C';
+    const tempMin = (mode === 'n2_sat') ? '0' : '-273'; // Kelvin can't be negative, Celsius can
+    
     html = `
       <div style="margin: 20px;">
         <p><strong>Choose input parameter:</strong></p>
         <div class="input-option">
           <input type="radio" id="tempOption" name="inputType" value="temperature" checked>
           <label for="tempOption">Temperature (${tempUnit}): </label>
-          <input type="number" id="tempInput" step="any">
+          <input type="number" id="tempInput" step="any" min="${tempMin}">
         </div>
         <div class="input-option">
           <input type="radio" id="pressOption" name="inputType" value="pressure">
           <label for="pressOption">Pressure (kPa): </label>
-          <input type="number" id="pressInput" step="any">
+          <input type="number" id="pressInput" step="any" min="0">
         </div>
       </div>`;
       
   } else if (mode === 'superheated' || mode.includes('superheat')) {
-    // For superheated data - pressure dropdown then temperature input
     let dataset;
     if (mode === 'superheated') dataset = water.superheat;
     else if (mode === 'nh3_superheat') dataset = ammonia.superheat;
@@ -211,6 +211,8 @@ function setupInputs() {
     if (dataset && dataset.length > 0) {
       const pressures = [...new Set(dataset.map(d => d.P))].sort((a, b) => a - b);
       const tempUnit = (mode === 'n2_superheat') ? 'K' : '°C';
+      const tempMin = (mode === 'n2_superheat') ? '0' : '-273';
+      
       html = `
         <div style="margin: 20px;">
           <p>Pressure (kPa): 
@@ -219,7 +221,7 @@ function setupInputs() {
             </select>
           </p>
           <p>Temperature (${tempUnit}): 
-            <input type="number" id="tempInput" step="any">
+            <input type="number" id="tempInput" step="any" min="${tempMin}">
           </p>
         </div>`;
     } else {
@@ -227,7 +229,6 @@ function setupInputs() {
     }
     
   } else if (mode === 'water_compressed') {
-    // For compressed liquid - pressure dropdown then temperature input (similar to superheated)
     const dataset = water.compr;
     if (dataset && dataset.length > 0) {
       const pressures = [...new Set(dataset.map(d => d.P))].sort((a, b) => a - b);
@@ -239,7 +240,7 @@ function setupInputs() {
             </select>
           </p>
           <p>Temperature (°C): 
-            <input type="number" id="tempInput" step="any">
+            <input type="number" id="tempInput" step="any" min="-273">
           </p>
         </div>`;
     } else {
@@ -249,11 +250,10 @@ function setupInputs() {
   
   document.getElementById('inputs').innerHTML = html;
   
-  // Add event listeners for radio buttons to enable/disable inputs
   if (document.getElementById('tempOption')) {
     document.getElementById('tempOption').addEventListener('change', toggleInputs);
     document.getElementById('pressOption').addEventListener('change', toggleInputs);
-    toggleInputs(); // Initialize state
+    toggleInputs();
   }
 }
 
@@ -279,18 +279,24 @@ document.getElementById('mode').addEventListener('change', setupInputs);
 function interpolate(arr, key, value, outputs) {
   if (!arr || arr.length === 0) return {};
   
-  // Clean and sort array
+  // Clean and sort array - handle negative values properly
   const cleanArr = arr.filter(row => row[key] !== undefined && row[key] !== null && row[key] !== "");
   cleanArr.sort((a, b) => parseFloat(a[key]) - parseFloat(b[key]));
   
   const numValue = parseFloat(value);
   if (isNaN(numValue)) return {};
   
-  // Find exact match
-  const exact = cleanArr.find(r => Math.abs(parseFloat(r[key]) - numValue) < 1e-6);
+  // Find exact match with better precision for negative values
+  const exact = cleanArr.find(r => Math.abs(parseFloat(r[key]) - numValue) < 1e-10);
   if (exact) {
     return outputs.reduce((res, col) => {
-      const val = parseFloat(exact[col]);
+      let val = exact[col];
+      // Handle string negative values like "−50" or "-50"
+      if (typeof val === 'string' && (val.includes('−') || val.includes('-'))) {
+        val = parseFloat(val.replace('−', '-')); // Replace minus sign with hyphen
+      } else {
+        val = parseFloat(val);
+      }
       return {...res, [col]: isNaN(val) ? exact[col] : val};
     }, {});
   }
@@ -304,8 +310,21 @@ function interpolate(arr, key, value, outputs) {
   const frac = (numValue - parseFloat(lower[key])) / (parseFloat(upper[key]) - parseFloat(lower[key]));
   
   return outputs.reduce((res, col) => {
-    const lowerVal = parseFloat(lower[col]);
-    const upperVal = parseFloat(upper[col]);
+    let lowerVal = lower[col];
+    let upperVal = upper[col];
+    
+    // Handle string negative values
+    if (typeof lowerVal === 'string' && (lowerVal.includes('−') || lowerVal.includes('-'))) {
+      lowerVal = parseFloat(lowerVal.replace('−', '-'));
+    } else {
+      lowerVal = parseFloat(lowerVal);
+    }
+    
+    if (typeof upperVal === 'string' && (upperVal.includes('−') || upperVal.includes('-'))) {
+      upperVal = parseFloat(upperVal.replace('−', '-'));
+    } else {
+      upperVal = parseFloat(upperVal);
+    }
     
     if (isNaN(lowerVal) || isNaN(upperVal)) {
       return {...res, [col]: lower[col]};
@@ -314,11 +333,18 @@ function interpolate(arr, key, value, outputs) {
     return {...res, [col]: lowerVal + frac * (upperVal - lowerVal)};
   }, {});
 }
-
+  
 function getProperties() {
   const mode = document.getElementById('mode').value;
   let result = {};
   let dataset, substance;
+  // In the getProperties() function, update the validation:
+  if (tempOption && tempOption.checked) {
+    const T = parseFloat(document.getElementById('tempInput').value);
+    if (isNaN(T)) throw new Error("Please enter a valid temperature value");
+    // Remove any minimum temperature validation that might reject negative values
+  }
+  
 
   // Determine dataset and substance
   if (mode === 'sat_temp') {
@@ -467,6 +493,7 @@ setupInputs();
 
 </body>
 </html>
+
 
 
 
