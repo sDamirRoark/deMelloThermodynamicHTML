@@ -84,32 +84,32 @@
   <option value="sat_temp">Saturated Water</option>
   <option value="sat_press">Saturated Water Pressure Entry</option>
   <option value="superheated">Superheated Vapor</option>
-  <option value="water_compressed">Water — Compressed Liquid</option>
+  <option value="water_compressed">Water – Compressed Liquid</option>
   <option value="water_satsolidsatvapor">Saturated Solid Saturated Vapor</option>
 
   <!-- Ammonia -->
-  <option value="nh3_sat">Ammonia — Saturated</option>
-  <option value="nh3_superheat">Ammonia — Superheated Vapor</option>
+  <option value="nh3_sat">Ammonia – Saturated</option>
+  <option value="nh3_superheat">Ammonia – Superheated Vapor</option>
 
   <!-- Carbon Dioxide -->
-  <option value="co2_sat">CO₂ — Saturated</option>
-  <option value="co2_superheat">CO₂ — Superheated Vapor</option>
+  <option value="co2_sat">CO₂ – Saturated</option>
+  <option value="co2_superheat">CO₂ – Superheated Vapor</option>
 
   <!-- R-410a -->
-  <option value="r410a_sat">R-410a — Saturated</option>
-  <option value="r410a_superheat">R-410a — Superheated Vapor</option>
+  <option value="r410a_sat">R-410a – Saturated</option>
+  <option value="r410a_superheat">R-410a – Superheated Vapor</option>
 
   <!-- R-134a -->
-  <option value="r134a_sat">R-134a — Saturated</option>
-  <option value="r134a_superheat">R-134a — Superheated Vapor</option>
+  <option value="r134a_sat">R-134a – Saturated</option>
+  <option value="r134a_superheat">R-134a – Superheated Vapor</option>
 
   <!-- Nitrogen -->
-  <option value="n2_sat">Nitrogen — Saturated</option>
-  <option value="n2_superheat">Nitrogen — Superheated Vapor</option>
+  <option value="n2_sat">Nitrogen – Saturated</option>
+  <option value="n2_superheat">Nitrogen – Superheated Vapor</option>
 
   <!-- Methane -->
-  <option value="ch4_sat_temp">Methane — Saturated (by Temperature)</option>
-  <option value="ch4_superheat">Methane — Superheated Vapor</option>
+  <option value="ch4_sat_temp">Methane – Saturated (by Temperature)</option>
+  <option value="ch4_superheat">Methane – Superheated Vapor</option>
 </select>
 
 <div id="inputs"></div>
@@ -176,179 +176,190 @@ function setupInputs() {
   const mode = document.getElementById('mode').value;
   let html = '';
   
-  if (mode === 'sat_temp' || mode === 'nh3_sat' || mode === 'co2_sat' || 
-      mode === 'r410a_sat' || mode === 'r134a_sat' || mode === 'n2_sat' || 
-      mode === 'ch4_sat_temp' || mode === 'sat_press' || mode === 'water_satsolidsatvapor') {
-    
-    const tempUnit = (mode === 'n2_sat') ? 'K' : '°C';
-    const tempMin = (mode === 'n2_sat') ? '0' : '-273'; // Kelvin can't be negative, Celsius can
-    
-    html = `
-      <div style="margin: 20px;">
-        <p><strong>Choose input parameter:</strong></p>
-        <div class="input-option">
-          <input type="radio" id="tempOption" name="inputType" value="temperature" checked>
-          <label for="tempOption">Temperature (${tempUnit}): </label>
-          <input type="number" id="tempInput" step="any" min="${tempMin}">
-        </div>
-        <div class="input-option">
-          <input type="radio" id="pressOption" name="inputType" value="pressure">
-          <label for="pressOption">Pressure (kPa): </label>
-          <input type="number" id="pressInput" step="any" min="0">
-        </div>
-      </div>`;
+  try {
+    if (mode === 'sat_temp' || mode === 'nh3_sat' || mode === 'co2_sat' || 
+        mode === 'r410a_sat' || mode === 'r134a_sat' || mode === 'n2_sat' || 
+        mode === 'ch4_sat_temp' || mode === 'sat_press' || mode === 'water_satsolidsatvapor') {
       
-  } else if (mode === 'superheated' || mode.includes('superheat')) {
-    let dataset;
-    if (mode === 'superheated') dataset = water.superheat;
-    else if (mode === 'nh3_superheat') dataset = ammonia.superheat;
-    else if (mode === 'co2_superheat') dataset = co2.superheat;
-    else if (mode === 'r410a_superheat') dataset = r410a.superheat;
-    else if (mode === 'r134a_superheat') dataset = r134a.superheat;
-    else if (mode === 'n2_superheat') dataset = nitrogen.superheat;
-    else if (mode === 'ch4_superheat') dataset = methane.superheat;
-    
-    if (dataset && dataset.length > 0) {
-      const pressures = [...new Set(dataset.map(d => d.P))].sort((a, b) => a - b);
-      const tempUnit = (mode === 'n2_superheat') ? 'K' : '°C';
-      const tempMin = (mode === 'n2_superheat') ? '0' : '-273';
+      const tempUnit = (mode === 'n2_sat') ? 'K' : '°C'; // Fixed degree symbol
+      const tempMin = (mode === 'n2_sat') ? '0' : '-273';
       
       html = `
         <div style="margin: 20px;">
-          <p>Pressure (kPa): 
-            <select id="pressSelect">
-              ${pressures.map(p => `<option value="${p}">${p}</option>`).join('')}
-            </select>
-          </p>
-          <p>Temperature (${tempUnit}): 
+          <p><strong>Choose input parameter:</strong></p>
+          <div class="input-option">
+            <input type="radio" id="tempOption" name="inputType" value="temperature" checked>
+            <label for="tempOption">Temperature (${tempUnit}): </label>
             <input type="number" id="tempInput" step="any" min="${tempMin}">
-          </p>
+          </div>
+          <div class="input-option">
+            <input type="radio" id="pressOption" name="inputType" value="pressure">
+            <label for="pressOption">Pressure (kPa): </label>
+            <input type="number" id="pressInput" step="any" min="0">
+          </div>
         </div>`;
-    } else {
-      html = `<p class="error">No data available for this option.</p>`;
+        
+    } else if (mode === 'superheated' || mode.includes('superheat')) {
+      let dataset;
+      if (mode === 'superheated') dataset = water.superheat;
+      else if (mode === 'nh3_superheat') dataset = ammonia.superheat;
+      else if (mode === 'co2_superheat') dataset = co2.superheat;
+      else if (mode === 'r410a_superheat') dataset = r410a.superheat;
+      else if (mode === 'r134a_superheat') dataset = r134a.superheat;
+      else if (mode === 'n2_superheat') dataset = nitrogen.superheat;
+      else if (mode === 'ch4_superheat') dataset = methane.superheat;
+      
+      if (dataset && dataset.length > 0) {
+        const pressures = [...new Set(dataset.map(d => d.P))].sort((a, b) => a - b);
+        const tempUnit = (mode === 'n2_superheat') ? 'K' : '°C';
+        const tempMin = (mode === 'n2_superheat') ? '0' : '-273';
+        
+        html = `
+          <div style="margin: 20px;">
+            <p>Pressure (kPa): 
+              <select id="pressSelect">
+                ${pressures.map(p => `<option value="${p}">${p}</option>`).join('')}
+              </select>
+            </p>
+            <p>Temperature (${tempUnit}): 
+              <input type="number" id="tempInput" step="any" min="${tempMin}">
+            </p>
+          </div>`;
+      } else {
+        html = `<p class="error">No data available for this option.</p>`;
+      }
+      
+    } else if (mode === 'water_compressed') {
+      const dataset = water.compr;
+      if (dataset && dataset.length > 0) {
+        const pressures = [...new Set(dataset.map(d => d.P))].sort((a, b) => a - b);
+        html = `
+          <div style="margin: 20px;">
+            <p>Pressure (kPa): 
+              <select id="pressSelect">
+                ${pressures.map(p => `<option value="${p}">${p}</option>`).join('')}
+              </select>
+            </p>
+            <p>Temperature (°C): 
+              <input type="number" id="tempInput" step="any" min="-273">
+            </p>
+          </div>`;
+      } else {
+        html = `<p class="error">No data available for compressed liquid water.</p>`;
+      }
     }
     
-  } else if (mode === 'water_compressed') {
-    const dataset = water.compr;
-    if (dataset && dataset.length > 0) {
-      const pressures = [...new Set(dataset.map(d => d.P))].sort((a, b) => a - b);
-      html = `
-        <div style="margin: 20px;">
-          <p>Pressure (kPa): 
-            <select id="pressSelect">
-              ${pressures.map(p => `<option value="${p}">${p}</option>`).join('')}
-            </select>
-          </p>
-          <p>Temperature (°C): 
-            <input type="number" id="tempInput" step="any" min="-273">
-          </p>
-        </div>`;
-    } else {
-      html = `<p class="error">No data available for compressed liquid water.</p>`;
+    document.getElementById('inputs').innerHTML = html;
+    
+    // Add event listeners with error checking
+    const tempOption = document.getElementById('tempOption');
+    const pressOption = document.getElementById('pressOption');
+    if (tempOption && pressOption) {
+      tempOption.addEventListener('change', toggleInputs);
+      pressOption.addEventListener('change', toggleInputs);
+      toggleInputs();
     }
-  }
-  
-  document.getElementById('inputs').innerHTML = html;
-  
-  if (document.getElementById('tempOption')) {
-    document.getElementById('tempOption').addEventListener('change', toggleInputs);
-    document.getElementById('pressOption').addEventListener('change', toggleInputs);
-    toggleInputs();
+    
+  } catch (error) {
+    console.error('Error in setupInputs:', error);
+    document.getElementById('inputs').innerHTML = `<p class="error">Error setting up inputs: ${error.message}</p>`;
   }
 }
 
 function toggleInputs() {
-  const tempOption = document.getElementById('tempOption');
-  const pressOption = document.getElementById('pressOption');
-  const tempInput = document.getElementById('tempInput');
-  const pressInput = document.getElementById('pressInput');
-  
-  if (tempOption && tempOption.checked) {
-    tempInput.disabled = false;
-    pressInput.disabled = true;
-    pressInput.value = '';
-  } else if (pressOption && pressOption.checked) {
-    tempInput.disabled = true;
-    pressInput.disabled = false;
-    tempInput.value = '';
+  try {
+    const tempOption = document.getElementById('tempOption');
+    const pressOption = document.getElementById('pressOption');
+    const tempInput = document.getElementById('tempInput');
+    const pressInput = document.getElementById('pressInput');
+    
+    // Add null checks
+    if (!tempOption || !pressOption || !tempInput || !pressInput) return;
+    
+    if (tempOption.checked) {
+      tempInput.disabled = false;
+      pressInput.disabled = true;
+      pressInput.value = '';
+    } else if (pressOption.checked) {
+      tempInput.disabled = true;
+      pressInput.disabled = false;
+      tempInput.value = '';
+    }
+  } catch (error) {
+    console.error('Error in toggleInputs:', error);
   }
 }
 
-document.getElementById('mode').addEventListener('change', setupInputs);
+function parseNumericValue(value) {
+  if (typeof value === 'string') {
+    // Handle various negative sign representations
+    value = value.replace(/−|–|—|∞/g, '-').replace(/âˆ'/g, '-');
+  }
+  const num = parseFloat(value);
+  return isNaN(num) ? null : num;
+}
 
 function interpolate(arr, key, value, outputs) {
   if (!arr || arr.length === 0) return {};
   
-  // Clean and sort array - handle negative values properly
-  const cleanArr = arr.filter(row => row[key] !== undefined && row[key] !== null && row[key] !== "");
-  cleanArr.sort((a, b) => parseFloat(a[key]) - parseFloat(b[key]));
-  
-  const numValue = parseFloat(value);
-  if (isNaN(numValue)) return {};
-  
-  // Find exact match with better precision for negative values
-  const exact = cleanArr.find(r => Math.abs(parseFloat(r[key]) - numValue) < 1e-10);
-  if (exact) {
+  try {
+    // Clean array and convert values
+    const cleanArr = arr.filter(row => {
+      const val = parseNumericValue(row[key]);
+      return val !== null;
+    }).map(row => {
+      const newRow = {...row};
+      newRow[key] = parseNumericValue(row[key]);
+      return newRow;
+    });
+    
+    cleanArr.sort((a, b) => a[key] - b[key]);
+    
+    const numValue = parseNumericValue(value);
+    if (numValue === null) return {};
+    
+    // Find exact match with reasonable precision
+    const exact = cleanArr.find(r => Math.abs(r[key] - numValue) < 1e-6);
+    if (exact) {
+      return outputs.reduce((res, col) => {
+        const val = parseNumericValue(exact[col]);
+        return {...res, [col]: val !== null ? val : exact[col]};
+      }, {});
+    }
+    
+    // Find bounds for interpolation
+    const lower = cleanArr.filter(r => r[key] <= numValue).pop();
+    const upper = cleanArr.find(r => r[key] >= numValue);
+    
+    if (!lower || !upper || lower === upper) return {};
+    
+    const frac = (numValue - lower[key]) / (upper[key] - lower[key]);
+    
     return outputs.reduce((res, col) => {
-      let val = exact[col];
-      // Handle string negative values like "−50" or "-50"
-      if (typeof val === 'string' && (val.includes('−') || val.includes('-'))) {
-        val = parseFloat(val.replace('−', '-')); // Replace minus sign with hyphen
-      } else {
-        val = parseFloat(val);
+      const lowerVal = parseNumericValue(lower[col]);
+      const upperVal = parseNumericValue(upper[col]);
+      
+      if (lowerVal === null || upperVal === null) {
+        return {...res, [col]: lower[col]};
       }
-      return {...res, [col]: isNaN(val) ? exact[col] : val};
+      
+      return {...res, [col]: lowerVal + frac * (upperVal - lowerVal)};
     }, {});
+    
+  } catch (error) {
+    console.error('Error in interpolate:', error);
+    return {};
   }
-  
-  // Find bounds for interpolation
-  const lower = cleanArr.filter(r => parseFloat(r[key]) <= numValue).pop();
-  const upper = cleanArr.find(r => parseFloat(r[key]) >= numValue);
-  
-  if (!lower || !upper || lower === upper) return {};
-  
-  const frac = (numValue - parseFloat(lower[key])) / (parseFloat(upper[key]) - parseFloat(lower[key]));
-  
-  return outputs.reduce((res, col) => {
-    let lowerVal = lower[col];
-    let upperVal = upper[col];
-    
-    // Handle string negative values
-    if (typeof lowerVal === 'string' && (lowerVal.includes('−') || lowerVal.includes('-'))) {
-      lowerVal = parseFloat(lowerVal.replace('−', '-'));
-    } else {
-      lowerVal = parseFloat(lowerVal);
-    }
-    
-    if (typeof upperVal === 'string' && (upperVal.includes('−') || upperVal.includes('-'))) {
-      upperVal = parseFloat(upperVal.replace('−', '-'));
-    } else {
-      upperVal = parseFloat(upperVal);
-    }
-    
-    if (isNaN(lowerVal) || isNaN(upperVal)) {
-      return {...res, [col]: lower[col]};
-    }
-    
-    return {...res, [col]: lowerVal + frac * (upperVal - lowerVal)};
-  }, {});
 }
   
 function getProperties() {
   const mode = document.getElementById('mode').value;
   let result = {};
   let dataset, substance;
-  // In the getProperties() function, update the validation:
-  if (tempOption && tempOption.checked) {
-    const T = parseFloat(document.getElementById('tempInput').value);
-    if (isNaN(T)) throw new Error("Please enter a valid temperature value");
-    // Remove any minimum temperature validation that might reject negative values
-  }
-  
 
   // Determine dataset and substance
   if (mode === 'sat_temp') {
-    dataset = water.satTemp; // Both use same dataset
+    dataset = water.satTemp;
     substance = 'water';
   } else if (mode === 'sat_press') {
     dataset = water.satPress;
@@ -411,8 +422,15 @@ function getProperties() {
       const tempOption = document.getElementById('tempOption');
       const pressOption = document.getElementById('pressOption');
       
-      if (tempOption && tempOption.checked) {
-        const T = parseFloat(document.getElementById('tempInput').value);
+      if (!tempOption || !pressOption) {
+        throw new Error("Input options not found");
+      }
+      
+      if (tempOption.checked) {
+        const tempInput = document.getElementById('tempInput');
+        if (!tempInput) throw new Error("Temperature input not found");
+        
+        const T = parseFloat(tempInput.value);
         if (isNaN(T)) throw new Error("Please enter a valid temperature value");
         
         if (mode === 'water_satsolidsatvapor') {
@@ -420,8 +438,11 @@ function getProperties() {
         } else {
           result = interpolate(dataset, 'T', T, ["P","v_f","v_fg","v_g","u_f","u_fg","u_g","h_f","h_fg","h_g","s_f","s_fg","s_g"]);
         }
-      } else if (pressOption && pressOption.checked) {
-        const P = parseFloat(document.getElementById('pressInput').value);
+      } else if (pressOption.checked) {
+        const pressInput = document.getElementById('pressInput');
+        if (!pressInput) throw new Error("Pressure input not found");
+        
+        const P = parseFloat(pressInput.value);
         if (isNaN(P)) throw new Error("Please enter a valid pressure value");
         
         if (mode === 'water_satsolidsatvapor') {
@@ -429,14 +450,19 @@ function getProperties() {
         } else {
           result = interpolate(dataset, 'P', P, ["T","v_f","v_fg","v_g","u_f","u_fg","u_g","h_f","h_fg","h_g","s_f","s_fg","s_g"]);
         }
-      } else {
-        throw new Error("Please select either temperature or pressure input");
       }
       
     } else if (mode.includes('superheat') || mode === 'superheated' || mode === 'water_compressed') {
       // For superheated/compressed data
-      const P = parseFloat(document.getElementById('pressSelect').value);
-      const T = parseFloat(document.getElementById('tempInput').value);
+      const pressSelect = document.getElementById('pressSelect');
+      const tempInput = document.getElementById('tempInput');
+      
+      if (!pressSelect || !tempInput) {
+        throw new Error("Required inputs not found");
+      }
+      
+      const P = parseFloat(pressSelect.value);
+      const T = parseFloat(tempInput.value);
       if (isNaN(P) || isNaN(T)) throw new Error("Please enter valid pressure and temperature values");
       
       const subset = dataset.filter(r => Math.abs(parseFloat(r.P) - P) < 1e-6);
@@ -448,12 +474,15 @@ function getProperties() {
     displayResult(result, null, substance);
     
   } catch (error) {
+    console.error('Error in getProperties:', error);
     displayResult({}, error.message);
   }
 }
 
 function displayResult(result, errorMsg, substance = 'water') {
   const outputDiv = document.getElementById('output');
+  if (!outputDiv) return;
+  
   const units = {
     P: 'kPa',
     T: substance === 'nitrogen' ? 'K' : '°C',
@@ -488,6 +517,7 @@ function displayResult(result, errorMsg, substance = 'water') {
 }
 
 // Initialize inputs on page load
+document.getElementById('mode').addEventListener('change', setupInputs);
 setupInputs();
 </script>
 
