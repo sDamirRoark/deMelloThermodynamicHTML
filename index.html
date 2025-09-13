@@ -197,7 +197,17 @@ function setupInputs() {
   let html = '';
   
   try {
-    if (mode === 'sat_temp' || mode === 'nh3_sat' || mode === 'co2_sat' || 
+    if (mode === 'pure_species') {
+      const compounds = pureSpeciesData.map(d => d.Compound).sort();
+      html = `
+        <div style="margin: 20px;">
+          <p><strong>Select a compound:</strong></p>
+          <select id="compoundSelect" style="width: 250px;">
+            <option value="">-- Select Compound --</option>
+            ${compounds.map(c => `<option value="${c}">${c}</option>`).join('')}
+          </select>
+        </div>`;
+    } else if (mode === 'sat_temp' || mode === 'nh3_sat' || mode === 'co2_sat' || 
         mode === 'r410a_sat' || mode === 'r134a_sat' || mode === 'n2_sat' || 
         mode === 'ch4_sat_temp' || mode === 'sat_press' || mode === 'water_satsolidsatvapor') {
       
@@ -243,18 +253,7 @@ function setupInputs() {
               <input type="number" id="tempInput" step="any">
             </p>
           </div>`;
-      } else if (mode === 'pure_species') {
-        const compounds = pureSpeciesData.map(d => d.Compound).sort();
-        html = `
-          <div style="margin: 20px;">
-            <p><strong>Select a compound:</strong></p>
-            <select id="compoundSelect" style="width: 250px;">
-              <option value="">-- Select Compound --</option>
-              ${compounds.map(c => `<option value="${c}">${c}</option>`).join('')}
-            </select>
-          </div>`;
-      }  
-        else {
+      } else {
         html = `<p class="error">No data available for this option.</p>`;
       }
       
@@ -294,7 +293,7 @@ function setupInputs() {
     document.getElementById('inputs').innerHTML = `<p class="error">Error setting up inputs: ${error.message}</p>`;
   }
 }
-
+  
 function toggleInputs() {
   try {
     const tempOption = document.getElementById('tempOption');
@@ -592,6 +591,7 @@ setupInputs();
 
 </body>
 </html>
+
 
 
 
